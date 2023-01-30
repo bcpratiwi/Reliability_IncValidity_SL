@@ -8,12 +8,12 @@ library(caret)
 library(MASS)
 
 # load parcor package
-setwd("C:/Users/bungacitrab/surfdrive/PhD/research 2017-2018/parcor")
+setwd("~/parcor") 
 files <- dir()
 for(i in 1:length(files)) source(files[i])
 files <- dir(); for(i in 1:length(files)) source(files[i])
 
-setwd("C:/Users/bungacitrab/surfdrive/PhD/research 2017-2018/p1_application")
+setwd("~p1_application")
 proxPred_dutch_exc <- read.spss("Complete data Psychology sample.sav", to.data.frame = T)  # load data from Niessen et al (2016)
 X <- c("MeanHSG", "RawScore_Psychology", "RawScore_English", "RawScore_Math")
 
