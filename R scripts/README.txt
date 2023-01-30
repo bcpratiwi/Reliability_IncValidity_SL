@@ -13,7 +13,7 @@ main simulation :
    - auxilliary functions are in the the same folder
 
 2. p1_exp123_mySimulation.R
-   - simulation script calculate IV using the statistical learning approach
+   - simulation script calculate IV using the out-of-sample approach
    - auxilliary functions are in the the same folder
 
 3. p1_exp123_collect.R
