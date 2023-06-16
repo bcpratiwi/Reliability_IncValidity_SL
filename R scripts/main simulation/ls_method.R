@@ -12,9 +12,7 @@ ls_method <- function(SimData){
   bls <- coef(m1)
   bls_full <- coef(m2)
   
-  deltaR2 <- summary(m2)$r.squared - summary(m1)$r.squared
-  
-  return(list(bls = bls , bls_full = bls_full, deltaR2 = deltaR2))
+  return(list(bls = bls , bls_full = bls_full))
   
 }
 

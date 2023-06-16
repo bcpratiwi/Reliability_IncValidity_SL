@@ -1,1 +1,2 @@
-install.packages(c("parcor", "simex", "mefa"), Sys.getenv("R_LIBS_USER"), repos = "https://cran.uni-muenster.de/")
+install.packages(c("simex", "mefa", "here"), 
+                 Sys.getenv("R_LIBS_USER"), repos = "http://cran.case.edu")

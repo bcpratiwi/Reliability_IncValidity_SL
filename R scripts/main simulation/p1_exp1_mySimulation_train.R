@@ -1,9 +1,10 @@
+args <- commandArgs(TRUE)
+args <- as.numeric(args)
+
+
 # load library packages and source additional functions ----
-
-library(mefa)
-library(MASS)
-
-chunk <- function(x,n) split(x, sort(rank(x)%%n))
+library(mefa, lib.loc="directory")
+library(MASS, lib.loc="directory")
 
 source("findSigma.R")
 source("p1GenData.R")
@@ -17,75 +18,42 @@ ratio  <- c("1:0", "2:1" , "1:1" , "1:2")
 r12    <- seq(.1, .9, by = .2)
 R2     <- seq(.1, .4, by = .1)
 
-Rep    <- 100
+r   <- args
 
-FULLdesign <- expand.grid("rho1" = rho1, "rho2" = rho2, "ratio" = ratio, "N" = N, "r12" = r12, "R2" = R2)
-FULLdesign$ndesign <- 1:nrow(FULLdesign)
-# create objects RESULT -----------
-outcomeResult          <- c("Estimates", "MSEtrain_M1", "MSEtrain_M2", "IVtrain", "study")
-indexDesignResult      <- expand.grid("Estimates" =  "least_squares", 
-                                 "replication" = 1:Rep, "dnum" = FULLdesign$ndesign)
-checkResult            <- paste0("Row", indexDesignResult$dnum, "Rep", indexDesignResult$replication)
-nEst             <- length(unique(indexDesignResult$Estimates))
-RESULT           <- cbind.data.frame(indexDesignResult$Estimates, matrix(0, Rep * nrow(FULLdesign) * nEst, length(outcomeResult) - 2), checkResult)
-colnames(RESULT) <- outcomeResult
-check <- expand.grid(reps = 1:100, design = 1:36, run = 1:400)
-check$design <- rep(FULLdesign$ndesign, each = 100)
+design <- expand.grid("rho1" = rho1, "rho2" = rho2, "ratio" = ratio, "N" = N, "r12" = r12, "R2" = R2)
+design$ndesign <- 1:nrow(design)
 
-RESULT <- cbind(RESULT, check)
+RESULTS_train <- expand.grid(rep=r, ndesign=design$ndesign, 
+                             Estimates="least_squares", 
+                             inter_M1=0, b1_M1=0, inter_M2=0, b1_M2=0, b2_M2=0,
+                             MSEtrain_M1=0, MSEtrain_M2=0, IVMSEtrain=0,
+                             R2train_M1=0, R2train_M2=0, IVR2train=0)
 
-# ndesign : 14400
-# run : counter for job in cluster. nJobs : 400
-# each job runs 36 design
-
-
-for(run in 1:400){
+for(i in 1:nrow(design)){
   
-  design  <- FULLdesign[((run - 1)*36 +1):(run * 36), ]
+  set.seed((r + 1000)*design$ndesign[i])
   
+  cat("FULLdesign = ", design$ndesign[i], "replication = " , r, "\n")
   
-  for(i in 1:nrow(design)){
-    
-    for(r in 1:Rep){
-      
-     set.seed((r + 1000)*design$ndesign[i])
+  # generate data --
+  SimData <- do.call(p1GenData, design[i, -7]  )
   
-     cat("job = ", run, "FULLdesign = ", design$ndesign[i], "replication = " , r, "\n")
-     
-     # generate data --
-     SimData <- do.call(p1GenData, design[i, -7]  )
+  # Analyze data set with least squares -----
+  ls_est <- ls_method_train(SimData)     # R2 train is also in here
+  
+  RESULTS_train[RESULTS_train$rep == r & RESULTS_train$ndesign == design$ndesign[i], 
+                c("inter_M1", "b1_M1", "inter_M2", "b1_M2", "b2_M2")] <- unlist(ls_est[c(1,2)])
+  RESULTS_train[RESULTS_train$rep == r & RESULTS_train$ndesign == design$ndesign[i],
+                c("MSEtrain_M1", "MSEtrain_M2", "IVMSEtrain",
+                  "R2train_M1", "R2train_M2", "IVR2train")] <- unlist(ls_est[-c(1,2)])
   
   
-     # Analyze data set with least squares -----
-  
-     ls_est <- ls_method_train(SimData)     # R2 train is also in here
-     RESULT[RESULT$reps == r & RESULT$design == design$ndesign[i] & RESULT$run == run , 
-            c("MSEtrain_M1", "MSEtrain_M2", "IVtrain")] <- c(ls_est)
-
-    } # replication
-  } # design
-} # run
+} # design
 
 
-matrixDesignResult <- rep(FULLdesign, each = nEst * Rep)
-RESULTS_train <- cbind.data.frame(matrixDesignResult, RESULT)
-
-save(RESULTS_train, file = "RESULTS_train.Rdata") 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+RESULTS_train <- merge(RESULTS_train, design, by="ndesign")
+assign(paste0("RESULTS_train_rep", r), RESULTS_train)
+rm(RESULTS_train)
+setwd("directory")
+save(list = ls(pattern = "RESULTS_train"), file = paste0("RESULTS_train_rep", r, ".Rdata"))
 
