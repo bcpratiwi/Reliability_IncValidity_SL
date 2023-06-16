@@ -1,34 +1,28 @@
 ﻿* Encoding: UTF-8.
 
-* use RESULTS_train_test_wide.sav
+* analysis on RESULTS_ols_wide.sav in- and out- of sample IV from ols
 
 DATASET ACTIVATE DataSet1.
-USE ALL.
-COMPUTE filter_$=(PE = 3).
-VARIABLE LABELS filter_$ 'PE = 3 (FILTER)'.
-VALUE LABELS filter_$ 0 'Not Selected' 1 'Selected'.
-FORMATS filter_$ (f1.0).
-FILTER BY filter_$.
-EXECUTE.
-
-GLM value.train value.test BY rho1 rho2 ratio N r12 R2
-  /WSFACTOR=sample 2 Polynomial 
-  /MEASURE=type 
+GLM IVMSEtest IVMSEtrain BY rho1 rho2 ratio N r12 R2
+  /WSFACTOR=type 2 Polynomial 
+  /MEASURE=sample 
   /METHOD=SSTYPE(3)
-  /PRINT=ETASQ 
+  /PRINT=ETASQ HOMOGENEITY LOF
+  /SAVE=RESID ZRESID SRESID
   /CRITERIA=ALPHA(.05)
   /DESIGN= rho1 rho2 ratio N r12 R2 rho1*rho2 ratio*rho1 N*rho1 r12*rho1 R2*rho1 ratio*rho2 N*rho2 
     r12*rho2 R2*rho2 N*ratio r12*ratio R2*ratio N*r12 N*R2 R2*r12.
 
-
-* use RESULTS_test_wide.sav
-
-GLM ridge least_squares simex BY r12 R2 ratio rho1 rho2 N
-  /WSFACTOR=Estimates 3 Polynomial 
+* analysis on RESULTS_ols_wide.sav  out- of sample IV from ols, ridge, and simex 
+ 
+DATASET ACTIVATE DataSet2.
+GLM ridge least_squares simex BY rho1 rho2 ratio N r12 R2
+  /WSFACTOR=method 3 Polynomial 
+  /MEASURE=Estimates 
   /METHOD=SSTYPE(3)
-  /PRINT=ETASQ 
+  /SAVE=RESID ZRESID SRESID
+  /PRINT=ETASQ HOMOGENEITY LOF
   /CRITERIA=ALPHA(.05)
-  /WSDESIGN= Estimates
-  /DESIGN= r12 R2 ratio rho1 rho2 N R2*r12 r12*ratio r12*rho1 r12*rho2 N*r12 R2*ratio R2*rho1 
-    R2*rho2 N*R2 ratio*rho1 ratio*rho2 N*ratio rho1*rho2 N*rho1 N*rho2.
+  /DESIGN= rho1 rho2 ratio N r12 R2 rho1*rho2 ratio*rho1 N*rho1 r12*rho1 R2*rho1 ratio*rho2 N*rho2 
+    r12*rho2 R2*rho2 N*ratio r12*ratio R2*ratio N*r12 N*R2 R2*r12.
 
