@@ -16,7 +16,7 @@ main simulation :
    - simulation script calculate IV using the out-of-sample approach
    - auxilliary functions are in the the same folder
 
-3. p1_exp123_collect.R
+3. p1_***_collect.R
    - script to merge all results to 1 file
 
 4. p1_exp123_mod.R
@@ -25,4 +25,4 @@ main simulation :
    - write .sav file for the 2 Mixed Anova Analysis
 
 
-The simulation (3 statistical methods IV new definition) was performed on a computer cluster using R version 3.4.0
+The simulation (3 statistical methods IV new definition) was performed on a computer cluster using R version 4.2.1
