@@ -13,7 +13,7 @@ load("RESULTS_ols_long.Rdata") # contains RESULTS_ols_long
 
 RESULTS_ols_wide <- RESULTS_ols_long %>%
                       pivot_wider(names_from=sample, values_from=IV_MSE) %>%
-                      mutate(ave_IV_MSE = (train+test)/2, diff_IV_MSE=train-test)
+                      mutate(ave_IV_MSE = (train+test)/2)
 
 
 ## Interaction Effect Approach with Ncal (Main Effects are included) -------------------------------------------------------------------------
